@@ -2,6 +2,21 @@
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  user: 'postgres',
+  host: 'postgres-db',
+  database: 'mon_projet_db',
+  password: 'mypassword',
+  port: 5432,
+});
+
+// Vérification initiale
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) console.error('DB error:', err);
+  else console.log('DB connected:', res.rows[0]);
+});
 
 // Logger minimal: méthode, chemin, status, durée
 app.use((req, res, next) => {
@@ -30,6 +45,16 @@ app.get('/next-metro', (req, res) => {
   const station = (req.query.station || '').toString().trim();
   if (!station) return res.status(400).json({ error: "missing station" });
   return res.status(200).json({ station, line: 'M1', headwayMin: 3, nextArrival: nextTimeFromNow(3) });
+});
+
+app.get('/stations', async (_req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM stations');
+    return res.status(200).json(result.rows);
+  } catch (err) {
+    console.error('DB query error:', err);
+    return res.status(500).json({ error: 'Erreur serveur DB' });
+  }
 });
 
 // 404 JSON
