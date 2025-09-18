@@ -1,4 +1,4 @@
-const pool = require("../index");
+const pool = require("../index/index");
 
 exports.getAll = async (_req, res) => {
   try {

@@ -1,59 +1,128 @@
-
 openapi: 3.0.3
 info:
-  title: Dernier Métro API
+  title: Dernier Metro API
   version: 1.0.0
+  description: API pour gérer les stations de métro
+
 servers:
   - url: http://localhost:5000
+    description: Serveur local
+
 paths:
-  /health:
+  /stations:
     get:
-      summary: Health check
+      summary: Récupérer toutes les stations
       responses:
         '200':
-          description: OK
+          description: Liste des stations
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  service:
-                    type: string
-  /next-metro:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Station'
+
+    post:
+      summary: Créer une nouvelle station
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StationInput'
+      responses:
+        '201':
+          description: Station créée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+
+  /stations/{id}:
     get:
-      summary: Prochain passage de métro
+      summary: Récupérer une station par ID
       parameters:
-        - in: query
-          name: station
-          schema:
-            type: string
+        - name: id
+          in: path
+          description: ID de la station
           required: true
-          description: Nom de la station
+          schema:
+            type: integer
       responses:
         '200':
-          description: Heure d'arrivée estimée
+          description: Station trouvée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+        '404':
+          description: Station non trouvée
+
+    put:
+      summary: Modifier une station
+      parameters:
+        - name: id
+          in: path
+          description: ID de la station à modifier
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StationInput'
+      responses:
+        '200':
+          description: Station mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+        '404':
+          description: Station non trouvée
+
+    delete:
+      summary: Supprimer une station
+      parameters:
+        - name: id
+          in: path
+          description: ID de la station à supprimer
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Station supprimée
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  station:
+                  message:
                     type: string
-                  line:
-                    type: string
-                  headwayMin:
-                    type: integer
-                  nextArrival:
-                    type: string
-                    example: "12:34"
-        '400':
-          description: Paramètre manquant
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
+        '404':
+          description: Station non trouvée
+
+components:
+  schemas:
+    Station:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        ligne:
+          type: string
+    StationInput:
+      type: object
+      required:
+        - name
+        - ligne
+      properties:
+        name:
+          type: string
+        ligne:
+          type: string
