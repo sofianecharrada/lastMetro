@@ -7,10 +7,10 @@ COPY package.json .
 
 RUN npm install
 
-COPY server.js .
+COPY . .
 
-ENV PORT=3000
+ENV PORT=5000
 
-EXPOSE 3000
+EXPOSE 5000
 
 CMD ["node", "server.js"]
