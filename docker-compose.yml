@@ -11,9 +11,11 @@ services:
       - DB_NAME=projet_renforcement
       - DB_HOST=postgres-db
     ports:
-      - "5000:5000"
+      - "5001:5000"
     depends_on:
       - postgres-db
+    networks:
+      - backend
 
   swagger:
     image: swaggerapi/swagger-ui:latest
@@ -25,6 +27,8 @@ services:
       - "8081:8080"
     depends_on:
       - api
+    networks:
+      - backend
 
   postgres-db:
     image: postgres:16-alpine
@@ -35,8 +39,26 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db-data:/var/lib/postgresql/data   
-      - ./api/db:/docker-entrypoint-initdb.d  
+      - db-data:/var/lib/postgresql/data
+      - ./api/db:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+
+  test:
+    build: ./api
+    depends_on:
+      - postgres-db
+    command: npm test
+    environment:
+      - DB_HOST=postgres-db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=projet_renforcement
+    networks:
+      - backend
 
 volumes:
   db-data:
+
+networks:
+  backend:
